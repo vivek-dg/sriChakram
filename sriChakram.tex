@@ -1,0 +1,1150 @@
+%\documentclass[preview]{standalone}
+%\documentclass[convert={density=300,outext=.png}]{standalone}
+
+\documentclass[convert=pdf2svg]{standalone}
+%\documentclass[convert]{standalone}
+
+%\documentclass[]{article}
+%\usepackage[top=1.0in, bottom=1.0in, left=0.5in, right=0.5in]{geometry}
+
+%%IF THEN LOGIC
+\usepackage{ifthen}
+%\usepackage{amsmath}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%  FONTS %%%%%%%%%%%%%%%%%%%%
+
+% The fontspec package provides a nice interface to font loading.
+\usepackage{fontspec} 
+%\setmainfont[Script=Tamil,Scale=0.8]{Latha}
+%\setmainfont[Script=Tamil,Scale=0.9]{Arial Unicode MS}
+
+% Set the main font to Nakula (a Devanagari font I found on my system).
+%\setmainfont[Script=Devanagari,Scale = 1.2]{Nakula}
+%\setmainfont[Script=Devanagari,Scale = 1.2]{Code2000}
+\setmainfont[Script=Devanagari,Scale = 1.2]{Chandas}
+
+% Define the \Englishfont command to switch to the 'Fontin' font for English text
+\newfontfamily\Englishfont[Script=Latin]{Fontin}
+% Define the \eng command as a localized version of \latinfont
+\newcommand\eng[1]{{\Englishfont #1}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%   COLOR  %%%%%%%%%%%%
+\usepackage[dvipsnames]{xcolor}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%% TIKZ %%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{tikz}
+\usetikzlibrary{shadows}
+\usetikzlibrary{fadings}
+\usetikzlibrary{calc}
+\usetikzlibrary{shapes}
+\usetikzlibrary{intersections}
+
+
+%%%%%%%%%%%
+\makeatletter
+\newcommand{\gettikzxy}[3]{%
+  \tikz@scan@one@point\pgfutil@firstofone#1\relax
+  \edef#2{\the\pgf@x}%
+  \edef#3{\the\pgf@y}%
+}
+\makeatother
+%%%%%%%%%%%
+
+
+
+
+
+%%% PETALS !!!
+\tikzfading[name=fade out, inner color=transparent!0,
+  outer color=transparent!100]
+
+%% Make the petals look more traditional
+\def\petal { 
+%  [rounded corners=0.9] %
+%  (-1,0)%
+%  .. controls (-1,0.8) and (-0.2,0.8).. (0,1)%
+%  .. controls (0.2,0.8) and (1,0.8).. (1,0)%
+%  .. controls (0.7,-1) and (-0.7,-1).. (-1,0)%
+  
+  %% original from tex
+%	[rounded corners=0.5] %
+%  	(-1,0)%
+%  	.. controls (-1,0.6) and (-0.07,0.8).. (0,1)%
+%  	.. controls (0.07,0.8) and (1,0.6).. (1,0)%
+%  	.. controls (0.7,-1) and (-0.7,-1).. (-1,0)%
+	
+%	%% make it wider at the base
+%	  [rounded corners=0.5] %
+%  		(-1,-0.2)%
+%  		.. controls (-1,0.8) and (-0.2,0.6).. (0,1)%
+%  		.. controls (0.2,0.6) and (1,0.8).. (1,-0.2)%
+	
+	%% wider at base but less pointy at top
+	
+	  [rounded corners=0.5] %
+		(-1,-0.2)%
+		.. controls (-1,0.8) and (-0.07,0.8).. (0,1)%
+		.. controls (0.07,0.8) and (1,0.8).. (1,-0.2)%	
+}
+
+%%%%% one layer of petals %%%%%
+\def\mainbody{
+  \foreach \a in {\af,\as,...,360}
+  {
+    \begin{scope}[rotate=\a,shift={(0,\ysh)},xscale=\xs,yscale=\ys]
+      \draw[color=yellow!90!,thick,fill=\c] %
+      [drop shadow={shadow xshift=0.5pt, shadow yshift=-0.5pt}]
+      \petal;
+    \end{scope}
+
+    % fadings
+    \begin{scope}[transform canvas={rotate=\a}, shift={(0,\ysh)},xscale=\xs,yscale=\ys]
+      \clip \petal; %
+      \fill[path fading=fade out,fill=\fc, opacity=0.7]%
+      (0,-0.35) ellipse (1.2 and 0.75);
+      \fill[path fading=fade out,fill=\fc, opacity=0.3]%
+      (0,-0.2) ellipse (1.2 and 0.4);
+      \fill[path fading=fade out,fill=\fc,opacity=0.2] %
+      (-0.4,0.6) -- (0,0.9) -- (0.4,0.6);
+    \end{scope}
+  }
+}
+
+%%%%%%%%%%% petal colouring %%%%%%%%%%
+% #1 - the color of the petal layer
+% #2 - the color of the fading, gets denser closer to the center
+% #3 - the x-scale to render the diagram
+% #4 - the y-scale to render
+% #5 - y shift to be applied
+% #6 - increment angle
+\def \drawpetals[#1,#2,#3,#4,#5,#6]{
+  % ysh - yshift
+  % xs - xscale
+  % ys - yscale
+  % af - first angle in foreach
+  % as - second angle in foreach
+  % c - color of the petal
+  % fc - color of the fading
+  \foreach \ysh/\xs/\ys/\af/\as/\c/\fc in {%
+    #5/#3/#4/      0/#6/#1!/#2!%
+  }
+  {
+    \mainbody
+  }
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%% Parameters for the Sri Chakra
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcount\mytheta
+\def\r{5.3}
+\def\n{6} % number of angles
+\def\myangles{{0,30,90,150,180,270}} % angles for the 1st south triangle
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% Color for the triangles in SriChakra
+%%Bindu color
+\def\binduLineColor{Goldenrod}
+\def\binduAreaColor{yellow!20!}
+
+%%%Triangles
+\def\triangleEdgeColor{Goldenrod}
+\def\triangleAreaColor{red!75!}
+
+%%Innermost circle
+\def\innerCircleEdgeColor{Goldenrod}
+\def\innerCircleAreaColor{White}
+
+%%Inner Petals
+\def\innerPetalColor{\triangleAreaColor}
+\def\innerPetalGradientColor{\triangleAreaColor}
+
+%%%Middle circle
+\def\innerCircleTwoEdgeColor{Red}
+
+
+%%%Outer Petals
+\def\outerPetalColor{\triangleAreaColor}
+\def\outerPetalGradientColor{\triangleAreaColor}
+
+%%%Three concentric outer circles
+\def\circleEdgeColorOne{Goldenrod}
+\def\circleEdgeColorTwo{Goldenrod}
+\def\circleEdgeColorThree{Goldenrod}
+
+%%%Radial background
+\def\backgroundGradientColorOne{black}
+\def\backgroundGradientColorTwo{black}
+
+
+%%Outer square
+%\def\squareLinesColor{\triangleAreaColor}
+\def\squareLinesColor{Goldenrod}
+\def\squareAreaColor{\backgroundGradientColorOne}
+
+%% Color of OM
+\def\omcolor{Goldenrod}
+
+\colorlet{triangle edge}{\triangleEdgeColor}
+\colorlet{triangle area}{\triangleAreaColor}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% Color for the triangles in SriChakra
+%%%Bindu color
+%\def\binduLineColor{green!80!}
+%\def\binduAreaColor{yellow!30!}
+%
+%%%%Triangles
+%\def\triangleEdgeColor{yellow!90!}
+%\def\triangleAreaColor{red!75!}
+%
+%%%Innermost circle
+%\def\innerCircleEdgeColor{yellow!90!}
+%\def\innerCircleAreaColor{White}
+%
+%%%Inner Petals
+%\def\innerPetalColor{\triangleAreaColor}
+%\def\innerPetalGradientColor{\triangleAreaColor}
+%
+%%%%Middle circle
+%\def\innerCircleTwoEdgeColor{Red}
+%
+%
+%%%%Outer Petals
+%\def\outerPetalColor{\triangleAreaColor}
+%\def\outerPetalGradientColor{\triangleAreaColor}
+%
+%%%%Three concentric outer circles
+%\def\circleEdgeColorOne{red!80!}
+%\def\circleEdgeColorTwo{orange!80!}
+%\def\circleEdgeColorThree{orange!50!}
+%
+%%%%Radial background
+%\def\backgroundGradientColorOne{yellow!30!}
+%\def\backgroundGradientColorTwo{white}
+%
+%
+%%%Outer square
+%\def\squareLinesColor{\triangleAreaColor}
+%\def\squareAreaColor{\backgroundGradientColorOne}
+%
+%%% Color of OM
+%\def\omcolor{Black}
+%
+%\colorlet{triangle edge}{\triangleEdgeColor}
+%\colorlet{triangle area}{\triangleAreaColor}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% Color for the triangles in SriChakra
+%%%Bindu color
+%\def\binduLineColor{green!80!}
+%\def\binduAreaColor{yellow!30!}
+%
+%%%Triangles
+%\def\triangleEdgeColor{Fuchsia}
+%\def\triangleAreaColor{Cerulean}
+%
+%%%Innermost circle
+%\def\innerCircleEdgeColor{Red}
+%\def\innerCircleAreaColor{White}
+%
+%%%Inner Petals
+%\def\innerPetalColor{ProcessBlue}
+%\def\innerPetalGradientColor{\triangleAreaColor}
+%
+%%%Middle circle
+%\def\innerCircleTwoEdgeColor{Red}
+%
+%%%Outer Petals
+%\def\outerPetalColor{BurntOrange}
+%\def\outerPetalGradientColor{BurntOrange!80!black!20!}
+%
+%%%Three concentric outer circles
+%%\def\circleEdgeColorOne{red!80!}
+%%\def\circleEdgeColorTwo{orange!80!}
+%%\def\circleEdgeColorThree{orange!50!}
+%
+%
+%\def\circleEdgeColorOne{ForestGreen}
+%\def\circleEdgeColorTwo{ForestGreen}
+%\def\circleEdgeColorThree{ForestGreen}
+%
+%%%Radial background
+%\def\backgroundGradientColorOne{white}
+%\def\backgroundGradientColorTwo{white}
+%
+%%%Outer square
+%\def\squareLinesColor{Bittersweet}
+%\def\squareAreaColor{\backgroundGradientColorOne}
+%
+%%% Color of OM
+%\def\omcolor{Black}
+%
+%\colorlet{triangle edge}{\triangleEdgeColor}
+%\colorlet{triangle area}{\triangleAreaColor}
+
+
+
+\tikzset{filled/.style={fill=triangle area, draw=triangle edge,rounded corners=0.5,thick},
+    outline/.style={draw=triangle edge,rounded corners=0.5}}
+
+%%%%%%%%%%%%%%%%%%%%%%%
+%%%For the outer square rims
+\tikzset{ 
+	triple/.style args={[#1] in [#2] in [#3]}{
+	         #1,preaction={preaction={draw,#3},draw,#2}     
+	} 
+}
+
+%%%%%%%%%%%%%%%%%%
+%%%%%Definitions for outer rim circles
+\def\outerradone{1.43*\r} %
+\def\outerradtwo{1.41*\r}
+\def\outerradthree{1.39*\r}
+%%%%% half of diagonal length for the outer rims
+\def\distBetLines{0.0286/2 * \r} %% distance between the three lines
+\def\rs{(sqrt(2)+0.2)*\outerradone} %% this is the percentage for the half of diagonal for the square rims
+\def\ma{0.15} %% this is the gap on the sides of the rectangular rims
+\def\ext{0.05} %%% percentage that extends out of the sri chakra in the mouth
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+\usetikzlibrary{fpu,decorations.pathreplacing}  
+
+\makeatletter  % Answer to the question 
+\def\pgfextractxasmacro#1#2{%  
+ \pgf@process{#2}%   
+\edef#1{\the\pgf@x}} 
+\def\pgfextractyasmacro#1#2{%   
+\pgf@process{#2}%   
+\edef#1{\the\pgf@y}} 
+\def\pgfextractxvecasmacro#1#2#3{%   
+% #1 macro where the x coor of the \vec{#2#3} is stored   
+% #2 node name   
+% #3 node name   
+\pgfextractxasmacro{#1}{%     
+\pgfpointdiff{\pgfpointanchor{#2}{center}}{\pgfpointanchor{#3}{center}}}} \def\pgfextractyvecasmacro#1#2#3{%   
+% #1 macro where the x coor of the \vec{#2#3} is stored   %
+% #2 node name   
+% #3 node name   
+\pgfextractyasmacro{#1}{%     
+\pgfpointdiff{
+\pgfpointanchor{#2}{center}
+}
+{\pgfpointanchor{#3}{center}
+}
+}
+}  
+\def\pgfgetsineofAOB#1#2#3#4{%   
+% #1 macro where the sine of angle AOB is stored   
+% #2 node name A  
+ % #3 node name O   
+% #4 node name B  
+ \bgroup   
+\pgfkeys{/pgf/fpu,pgf/fpu/output format=fixed}   
+\pgfextractxvecasmacro{\pgf@xA}{#3}{#2}%   
+\pgfextractyvecasmacro{\pgf@yA}{#3}{#2}%   
+\pgfextractxvecasmacro{\pgf@xB}{#3}{#4}%   
+\pgfextractyvecasmacro{\pgf@yB}{#3}{#4}%   
+\pgfmathparse{%     
+((\pgf@xA * \pgf@yB) - (\pgf@xB * \pgf@yA))/(sqrt(\pgf@xA * \pgf@xA     + \pgf@yA * \pgf@yA) * sqrt(\pgf@xB * \pgf@xB + \pgf@yB * \pgf@yB))}%   
+\xdef#1{\pgfmathresult}%   
+\egroup\ignorespaces}  
+\def\pgfgetcosineofAOB#1#2#3#4{%   
+% #1 macro where the cosine of angle AOB is stored   
+% #2 node name A   
+% #3 node name O   
+% #4 node name B   
+\bgroup   
+\pgfkeys{/pgf/fpu,pgf/fpu/output format=fixed}   
+\pgfextractxvecasmacro{\pgf@xA}{#3}{#2}%   
+\pgfextractyvecasmacro{\pgf@yA}{#3}{#2}%   
+\pgfextractxvecasmacro{\pgf@xB}{#3}{#4}%   
+\pgfextractyvecasmacro{\pgf@yB}{#3}{#4}%   
+\pgfmathparse{%     
+((\pgf@xA * \pgf@xB) + (\pgf@yA * \pgf@yB))/(sqrt(\pgf@xA * \pgf@xA     + \pgf@yA * \pgf@yA) * sqrt(\pgf@xB * \pgf@xB + \pgf@yB * \pgf@yB))}%   
+\xdef#1{\pgfmathresult}%   
+\egroup\ignorespaces}  
+\def\pgfgetangleofAOB#1#2#3#4{%   
+% #1 macro where the angle AOB is stored   
+% #2 node name A   
+% #3 node name O   
+% #4 node name B   
+\bgroup   
+\pgfgetsineofAOB{\pgf@sineAOB}{#2}{#3}{#4}%   
+\pgfgetcosineofAOB{\pgf@cosineAOB}{#2}{#3}{#4}%   
+\pgfmathparse{atan2(\pgf@cosineAOB,\pgf@sineAOB)}%   
+\xdef#1{\pgfmathresult}%   
+\egroup\ignorespaces} 
+% End of the answer 
+% Begin mark angle decoration 
+\pgfdeclaredecoration{mark angle}{init}{%   
+\state{init}[width = 0pt, next state = check for moveto,   persistent precomputation = {%    
+ \xdef\pgf@lib@decorations@numofconsecutivelineto{0}}]{}   
+\state{check for moveto}[width = 0pt,   
+next state=check for lineto,persistent precomputation={%     
+\begingroup     
+\pgf@lib@decoraions@installinputsegmentpoints
+ \ifx\pgfdecorationpreviousinputsegment\pgfdecorationinputsegmentmoveto 
+    \gdef\pgf@lib@decorations@numofconsecutivelineto{0}%     
+\fi     
+\endgroup}]{}   
+\state{check for lineto}[width=\pgfdecoratedinputsegmentremainingdistance,    
+next state=check for moveto,persistent precomputation={%     
+\begingroup     
+\pgf@lib@decoraions@installinputsegmentpoints    
+ \ifx\pgfdecorationcurrentinputsegment\pgfdecorationinputsegmentlineto
+     \xdef\pgf@lib@decorations@numofconsecutivelineto{% 
+      \number\numexpr\pgf@lib@decorations@numofconsecutivelineto+1\relax}% 
+    \ifcase\pgf@lib@decorations@numofconsecutivelineto\relax     \or     \pgf@process{\pgf@decorate@inputsegment@first}% 
+    \xdef\pgf@lib@decorations@first@lineto@point{\the\pgf@x,\the\pgf@y}%  
+   \pgf@process{\pgf@decorate@inputsegment@last}%   
+  \xdef\pgf@lib@decorations@second@lineto@point{\the\pgf@x,\the\pgf@y}%    
+ \pgfmathanglebetweenpoints{\pgf@decorate@inputsegment@last}{%      
+ \pgf@decorate@inputsegment@first}%    
+ \xdef\pgf@lib@decorations@lineto@startangle{\pgfmathresult}%   
+  \or     \pgf@process{\pgf@decorate@inputsegment@last}%    
+ \xdef\pgf@lib@decorations@third@lineto@point{\the\pgf@x,\the\pgf@y}%    
+ \pgfmathanglebetweenpoints{\pgf@decorate@inputsegment@first}{%      
+ \pgf@decorate@inputsegment@last}%    
+ \xdef\pgf@lib@decorations@lineto@endangle{\pgfmathresult}%  
+   \pgfdecoratedmarkanglecode     \fi     \fi     \endgroup}]{} }  
+\pgfqkeys{/pgf/decoration}{%   
+mark angle node text/.store in = \pgfdecoratedmarkanglenodetext,   mark angle node text = {},   mark angle code/.store in = \pgfdecoratedmarkanglecode,   mark angle code = {%     
+\fill[red,nearly transparent]     (\pgf@lib@decorations@second@lineto@point) --      ($(\pgf@lib@decorations@second@lineto@point)!1cm!     (\pgf@lib@decorations@first@lineto@point)$)      arc(\pgf@lib@decorations@lineto@startangle:     \pgf@lib@decorations@lineto@endangle:1cm) -- cycle;     \node at ($(\pgf@lib@decorations@second@lineto@point) +     ({\pgf@lib@decorations@lineto@startangle +       (\pgf@lib@decorations@lineto@endangle -        \pgf@lib@decorations@lineto@startangle)/2}:1.25cm)$)     {\pgfdecoratedmarkanglenodetext};}}   \makeatletter  \tikzset{mark angle/.style = {%     
+postaction = {%       
+decorate,       decoration = {mark angle}}}} 
+
+
+%\coordinate (O) at (0,0);   
+%\coordinate (x) at (5,0);   
+%\coordinate (y) at (0,5);   
+%\coordinate (M) at (30:5);   
+%\coordinate (N) at (215:5);  
+% \pgfgetangleofAOB{\firstangle}{x}{O}{M}%  
+% \pgfgetangleofAOB{\secondangle}{O}{M}{y}%   
+%\pgfgetangleofAOB{\thirdangle}{N}{O}{y}% 
+%  \draw[mark angle,/pgf/decoration/mark angle node     text={$\firstangle$},red] (x) -- (O) -- (M);   
+% \draw[mark angle,/pgf/decoration/mark angle node     text={$\secondangle$},blue] (O) -- (M) -- (y);   
+% \draw[mark angle,/pgf/decoration/mark angle node     text={$\thirdangle$},green] (N) -- (O) -- (y);
+
+
+
+
+
+
+\begin{document}
+
+
+\pagestyle {empty} % no page numbers
+\pagecolor{black}
+
+
+%\begin{center}
+
+\begin{tikzpicture}
+%radii for the circles
+%
+\pgfmathparse{(\rs*cos(45))}\let\xxa\pgfmathresult
+\pgfmathparse{\rs*sin (45)}\let\yya\pgfmathresult
+\pgfmathparse{\rs*cos(135)}\let\xxb\pgfmathresult
+\pgfmathparse{\rs*sin (135)}\let\yyb\pgfmathresult
+\pgfmathparse{\rs*cos(225)}\let\xxc\pgfmathresult
+\pgfmathparse{\rs*sin (225)}\let\yyc\pgfmathresult
+\pgfmathparse{\rs*cos(315)}\let\xxd\pgfmathresult
+\pgfmathparse{\rs*sin (315)}\let\yyd\pgfmathresult
+
+%%% the points on the outer rim to create the gap for the mouth
+%Near zero degree
+\pgfmathparse{\rs/sqrt(2)}\let\xxe\pgfmathresult
+\pgfmathparse{\ma*\rs}\let\yye\pgfmathresult
+
+%just below 90 degree
+\pgfmathparse{\ma*\rs}\let\xxf\pgfmathresult
+\pgfmathparse{\rs/sqrt(2)}\let\yyf\pgfmathresult
+%Just above 90 degrees
+\pgfmathparse{-\ma*\rs}\let\xxg\pgfmathresult
+\pgfmathparse{\rs/sqrt(2)}\let\yyg\pgfmathresult
+%
+%just below 180 degree
+\pgfmathparse{-\rs/sqrt(2)}\let\xxh\pgfmathresult
+\pgfmathparse{\ma*\rs}\let\yyh\pgfmathresult
+%Just above 180 degrees
+\pgfmathparse{-\rs/sqrt(2)}\let\xxi\pgfmathresult
+\pgfmathparse{-\ma*\rs}\let\yyi\pgfmathresult
+%
+%just below 270 degree
+\pgfmathparse{-\ma*\rs}\let\xxj\pgfmathresult
+\pgfmathparse{-\rs/sqrt(2)}\let\yyj\pgfmathresult
+%Just above 270 degrees
+\pgfmathparse{\ma*\rs}\let\xxk\pgfmathresult
+\pgfmathparse{-\rs/sqrt(2)}\let\yyk\pgfmathresult
+%
+%just below 360 degree
+\pgfmathparse{\rs/sqrt(2)}\let\xxl\pgfmathresult
+\pgfmathparse{-\ma*\rs}\let\yyl\pgfmathresult
+
+
+%%% the points on the outer rim to create the effect of the rim moving out
+%Near zero degree
+\pgfmathparse{(\rs/sqrt(2)) + (\ext*\rs)}\let\xxm\pgfmathresult
+\pgfmathparse{\ma*\rs}\let\yym\pgfmathresult
+
+%just below 90 degree
+\pgfmathparse{\ma*\rs}\let\xxn\pgfmathresult
+\pgfmathparse{(\rs/sqrt(2)) + (\ext*\rs)}\let\yyn\pgfmathresult
+%Just above 90 degrees
+\pgfmathparse{-\ma*\rs}\let\xxo\pgfmathresult
+\pgfmathparse{(\rs/sqrt(2)) + (\ext*\rs)}\let\yyo\pgfmathresult
+%
+%just below 180 degree
+\pgfmathparse{-((\rs/sqrt(2)) + (\ext*\rs))}\let\xxp\pgfmathresult
+\pgfmathparse{\ma*\rs}\let\yyp\pgfmathresult
+%Just above 180 degrees
+\pgfmathparse{-((\rs/sqrt(2)) + (\ext*\rs))}\let\xxq\pgfmathresult
+\pgfmathparse{-\ma*\rs}\let\yyq\pgfmathresult
+%
+%just below 270 degree
+\pgfmathparse{-\ma*\rs}\let\xxr\pgfmathresult
+\pgfmathparse{-((\rs/sqrt(2)) + (\ext*\rs))}\let\yyr\pgfmathresult
+%Just above 270 degrees
+\pgfmathparse{\ma*\rs}\let\xxs\pgfmathresult
+\pgfmathparse{-((\rs/sqrt(2)) + (\ext*\rs))}\let\yys\pgfmathresult
+%
+%just below 360 degree
+\pgfmathparse{(\rs/sqrt(2)) + (\ext*\rs)}\let\xxt\pgfmathresult
+\pgfmathparse{-\ma*\rs}\let\yyt\pgfmathresult
+
+
+%Find the coordinates
+\coordinate (S-1) at (\xxa, \yya); % 45 deg
+\coordinate (S-2) at (\xxb, \yyb); % 135 deg
+\coordinate (S-3) at (\xxc, \yyc); % 225 deg
+\coordinate (S-4) at (\xxd, \yyd); % 315 deg
+
+%Near Mid-points for the main gap
+\coordinate (S-5) at (\xxe, \yye); %above zero
+\coordinate (S-6) at (\xxf, \yyf);  %below 90
+\coordinate (S-7) at (\xxg, \yyg); % above 90
+\coordinate (S-8) at (\xxh, \yyh); %below 180
+\coordinate (S-9) at (\xxi, \yyi); % above 180
+\coordinate (S-10) at (\xxj, \yyj); %below 270
+\coordinate (S-11) at (\xxk, \yyk); % above 270
+\coordinate (S-12) at (\xxl, \yyl); % below 360
+
+%Near Mid-points for out moving effect for the rim
+\coordinate (S-13) at (\xxm, \yym); %above zero
+\coordinate (S-14) at (\xxn, \yyn);  %below 90
+\coordinate (S-15) at (\xxo, \yyo); % above 90
+\coordinate (S-16) at (\xxp, \yyp); %below 180
+\coordinate (S-17) at (\xxq, \yyq); % above 180
+\coordinate (S-18) at (\xxr, \yyr); %below 270
+\coordinate (S-19) at (\xxs, \yys); % above 270
+\coordinate (S-20) at (\xxt, \yyt); % below 360
+
+%Determine the intersection points
+%First define the line which we will need later
+\edef\tripleLineStyle{name path=lineOuter,draw,triple={[line width=\distBetLines*1 cm,\squareLinesColor] in       [line width=\distBetLines*6.5 cm,\squareAreaColor] in       [line width=\distBetLines*8.5 cm,\squareLinesColor]}}
+
+
+
+\path\expandafter[\tripleLineStyle] (S-13) -- (S-5) -- (S-1) -- (S-6) -- (S-14);
+
+\path\expandafter[\tripleLineStyle] (S-15) -- (S-7) -- (S-2) -- (S-8) -- (S-16);
+
+\path\expandafter[\tripleLineStyle] (S-17) -- (S-9) -- (S-3) -- (S-10) -- (S-18);
+
+\path\expandafter[\tripleLineStyle] (S-19) -- (S-11) -- (S-4) -- (S-12) -- (S-20);
+
+
+
+%%%%%%%%%%%%%%%%%%%%
+%%%%%%PUT the letter OM 
+%90 degree
+\pgfmathparse{0}\let\xom\pgfmathresult
+\pgfmathparse{(\rs/sqrt(2))}\let\yom\pgfmathresult
+\node [rectangle] (om) at (\xom,\yom){\LARGE \color{\omcolor} ॐ}; 
+
+
+
+
+%%%%%%%%%%%%%%
+%% Draw the outer circular rims
+%%%%%%%%% Outermost of the outer rims
+\shadedraw[shading=radial,outer color=\backgroundGradientColorOne,middle color=\backgroundGradientColorTwo,
+        inner color=\backgroundGradientColorTwo,draw=\circleEdgeColorOne,thick,name path=circle1] circle (\outerradone);
+ 
+%\draw[\circleEdgeColorOne,fill=\backgroundGradientColorOne,thick,name path=circle1] circle (\outerradone);
+
+%%%%%%%%% Central ring
+\draw[\circleEdgeColorTwo,thick,name path=circle2] circle (\outerradtwo);
+%%%%%%%%% Innermost of the outer rims
+\draw[\circleEdgeColorThree,thick,name path=circle3] circle (\outerradthree);
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% CLIPPING - Clip anything outside of the last rim of chakra
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clip circle (\outerradone);
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%% Next draw the first layer of outer petals
+%%%%%%%%%%% petal colouring %%%%%%%%%%
+% #1 - the color of the petal layer
+% #2 - the color of the fading, gets denser closer to the center
+% #3 - the x-scale to render the diagram
+% #4 - the y-scale to render
+% #5 - y shift to be applied
+% #6 - increment angle
+
+\edef\xscale{0.2 * \r}
+\edef\yscale{0.18 * \r}
+
+%%%Traditional petals
+%\begin{scope}[even odd rule]
+%\clip circle (1.2*\r) circle(\outerradone);  %%
+%\drawpetals[\outerPetalColor, \outerPetalGradientColor,\xscale,\yscale,1.2*\r,22.5];  %% outer ring of 16 petals
+%\end{scope}
+%
+%\draw[\circleEdgeColorTwo,thick,name path=circle1] circle (1.2*\r);  %% enclosing circle
+%
+%\begin{scope}[even odd rule]
+%\clip circle (\r) circle(1.2*\r); 
+%\drawpetals[\innerPetalColor,\innerPetalGradientColor,\xscale,\yscale,\r,45]; %% inner ring of 8 petals
+%\end{scope}
+
+%%%%More recent petals
+
+\begin{scope}[even odd rule]
+\clip circle (1.2*\r) circle(\outerradone);  %%
+\drawpetals[\outerPetalColor, \outerPetalGradientColor,\xscale*1.175,\yscale,1.2*\r,22.5];  %% outer ring of 16 petals
+\end{scope}
+
+\draw[\circleEdgeColorTwo,thick,name path=circle1] circle (1.2*\r);  %% enclosing circle
+
+\begin{scope}[even odd rule]
+\clip circle (\r) circle(1.2*\r); 
+\drawpetals[\innerPetalColor,\innerPetalGradientColor,\xscale*1.915,\yscale*1.15,0.96*\r,45]; %% inner ring of 8 petals
+\end{scope}
+
+
+
+
+
+%%%Draw the main circle to house the triangles
+%\shadedraw[shading=radial,outer color=\backgroundGradientColorOne,middle color=\backgroundGradientColorTwo,
+ %       inner color=\backgroundGradientColorTwo,draw=\circleEdgeColorTwo,name path=circle1] circle (\r);
+%\draw[orange!80!,fill=yellow!30!,thick,name path=circle1] circle (\r);
+
+%\draw[\innerCircleEdgeColor,fill=\innerCircleAreaColor,name path=circleInner] circle (\r);
+
+\draw[\innerCircleEdgeColor,name path=circleInner] circle (\r);
+
+%define the vertical line thro the center of the circle
+\path[name path=vertLine] (0,-\r) -- (0,\r);
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%% START OF MAIN CALCULATIONS %%%%%%%%%%
+
+%% First determine the base lines for the first set of triangles in the north and south directions
+%%%%%%%%%%%%% SKEW it a bit to get optimal results!!!!
+%%%%% SkEWing these angles alters the base of the South 1 triangle
+\pgfmathparse{\r*cos(0)}\let\xa\pgfmathresult
+\pgfmathparse{\r*sin (0)}\let\ya\pgfmathresult
+\pgfmathparse{\r*cos(32.6)}\let\xb\pgfmathresult
+\pgfmathparse{\r*sin (32.6)}\let\yb\pgfmathresult
+\pgfmathparse{\r*cos(90)}\let\xc\pgfmathresult
+\pgfmathparse{\r*sin (90)}\let\yc\pgfmathresult
+\pgfmathparse{\r*cos(147.4)}\let\xd\pgfmathresult
+\pgfmathparse{\r*sin (147.4)}\let\yd\pgfmathresult
+\pgfmathparse{\r*cos(180)}\let\xe\pgfmathresult
+\pgfmathparse{\r*sin (180)}\let\ye\pgfmathresult
+\pgfmathparse{\r*cos(270)}\let\xf\pgfmathresult
+\pgfmathparse{\r*sin (270)}\let\yf\pgfmathresult
+%%%%%%%%%%%%% SKEW it a bit to get optimal results!!!!
+%%%%% SkEWing these angles alters the base of the North 1 triangle
+\pgfmathparse{\r*cos(215.037)}\let\xg\pgfmathresult
+\pgfmathparse{\r*sin (215.037)}\let\yg\pgfmathresult
+\pgfmathparse{\r*cos(324.963)}\let\xh\pgfmathresult
+\pgfmathparse{\r*sin (324.963)}\let\yh\pgfmathresult
+
+%Find the coordinates
+\coordinate (A-1) at (\xa, \ya);
+\coordinate (A-2) at (\xb, \yb);
+\coordinate (A-3) at (\xc, \yc);
+\coordinate (A-4) at (\xd, \yd);
+\coordinate (A-5) at (\xe, \ye);
+\coordinate (A-6) at (\xf, \yf);
+\coordinate (A-7) at (\xg, \yg);
+\coordinate (A-8) at (\xh, \yh);
+
+%Determine the intersection points
+%First define the line which we will need later
+\path[name path=line1] (A-1) -- (A-3);
+\path[name path=line2] (A-3) -- (A-5);
+\path[name path=line3] (A-4) -- (A-6);
+\path[name path=line4] (A-6) -- (A-2);
+
+%\draw (A-1) -- (A-3) (A-6) -- (A-2);
+%\draw (A-3) -- (A-5) (A-4) -- (A-6);
+
+%Find the intersection points
+\path [name intersections={of=line1 and line4}];
+\coordinate (i-1) at (intersection-1);
+%\fill[fill=green,draw=blue] (i-1) circle (0.8mm); 
+\path [name intersections={of=line2 and line3}];
+\coordinate (i-2) at (intersection-1);
+%\fill[fill=green,draw=blue] (i-2) circle (0.8mm); 
+
+%Draw a line thro the intersection points and extend to meet the circle
+%find the half point
+\coordinate (south1-m-1) at ($(i-1)!0.5!(i-2)$);
+\path[name path=south1-temp] ($(south1-m-1)!1.5!(i-1)$) -- ($(south1-m-1)!1.5!(i-2)$);
+%intersection
+\path [name intersections={of=south1-temp and circleInner}];
+\coordinate (south1-base-1) at (intersection-1);
+%\fill[fill=red,draw=blue] (south1-base-1) circle (0.8mm); 
+\coordinate (south1-base-2) at (intersection-2);
+%\fill[fill=red,draw=blue] (south1-base-2) circle (0.8mm); 
+
+%Now draw the first base triangle facing south 
+%%% Draw with color in the end!!!
+\path[name path=south1] (A-6) -- (south1-base-1) -- (south1-base-2) -- cycle ;
+
+
+
+%%%%%%%%%%%%% 1st South Triangle complete
+
+%%%%%%%%%%%% Next is the first north facing triangle
+\path[name path=line5] (A-7) -- (south1-m-1);
+\path[name path=line6] (south1-m-1) -- (A-8);
+
+%Find the intersection points
+\path [name intersections={of=south1 and line5}];
+\coordinate (i-3) at (intersection-2);
+%%\fill[fill=green,draw=blue] (i-3) circle (0.8mm); 
+\path [name intersections={of=line6 and south1}];
+\coordinate (i-4) at (intersection-1);
+%%\fill[fill=green,draw=blue] (i-4) circle (0.8mm);
+
+
+%Draw a line thro the intersection points and extend to meet the circle
+%find the half point
+\coordinate (north1-m-1) at ($(i-3)!0.5!(i-4)$);
+\path[name path=north1-temp] ($(north1-m-1)!2!(i-3)$) -- ($(north1-m-1)!2!(i-4)$);
+%intersection
+\path [name intersections={of=north1-temp and circleInner}];
+\coordinate (north1-base-1) at (intersection-1);
+%\fill[fill=red,draw=blue] (north1-base-1) circle (0.8mm); 
+\coordinate (north1-base-2) at (intersection-2);
+%\fill[fill=red,draw=blue] (north1-base-2) circle (0.8mm);
+
+%Now draw the first base triangle facing south
+%%% Draw with color in the end!!!
+\path[name path global=north1] (A-3) -- (north1-base-1) -- (north1-base-2) -- cycle;
+
+%%%%%%%%%%%%% 1st North Triangle complete
+
+%%%%%%%%%%%% Next is the seconf south facing triangle
+
+%% with a radius , draw arcs with the base vertices of south 1 triangle to cut the inscribing circle at 2 
+%points and find its center. This is the top vertex of the 2nd south facing triangle
+ \edef\percR{1.065*\r}  %%%%%%% This is the point of genius
+\begin{scope}[shift={(south1-base-1)}] 
+\path[name path global=south1-arc-1] (240:\percR) arc (240:270:\percR);
+\end{scope}
+\begin{scope}[shift={(south1-base-2)}] 
+\path[name path global=south1-arc-2] (270:\percR) arc (270:300:\percR);
+\end{scope}
+
+%Find the intersection points with circleInner
+\path [name intersections={of=circleInner and south1-arc-1}];
+\coordinate (i-5) at (intersection-1);
+%\fill[fill=green,draw=blue] (i-5) circle (0.8mm); 
+\path [name intersections={of=circleInner and south1-arc-2}];
+\coordinate (i-6) at (intersection-1);
+%\fill[fill=green,draw=blue] (i-6) circle (0.8mm);
+
+
+%The mid point gives the top vertex
+\coordinate (south2-m-1) at ($(i-5)!0.5!(i-6)$);
+%\fill[fill=green,draw=blue] (south2-m-1) circle (0.8mm);
+
+%Find the intersection of north triangle 1 with the base of south triangle 1 
+\path[name path=south1-base] (south1-base-1) -- (south1-base-2);
+%Find the intersection points with north1
+\path [name intersections={of=north1 and south1-base}];
+\coordinate (i-7) at (intersection-1);
+%\fill[fill=green,draw=blue] (i-7) circle (0.8mm); 
+\coordinate (i-8) at (intersection-2);
+%\fill[fill=green,draw=blue] (i-8) circle (0.8mm);
+
+%Now extend the sides thro these intersection points to a certain distance
+% These need  to be stored... the base will be determined after the north 3 triangle is complete
+\path[name path=south2-side1-temp] (south2-m-1) -- ($(south2-m-1)!1.5!(i-7)$);
+\path[name path=south2-side2-temp] (south2-m-1) -- ($(south2-m-1)!1.5!(i-8)$);
+
+
+%%%%%%%%%% NORTH 3 Triangle should be completed even before North 2 Triangle
+%%%%%%%  It is needed so that we can complete south 2 triangle as well!!!!
+% The vertex is the mid point of the south 1 triangle's base
+
+
+% The sides of SOUTH 2 intersect the north 1 triangle's base at two points. Those intersection points
+%% are on the sides of NORTH 3 triangle!!
+%Find the intersection of north triangle 1 with the base of south triangle 1 
+\path[name path=north1-base] (north1-base-1) -- (north1-base-2);
+%Find the intersection points with south 2 sides (we don't have the full south 2 yet!!
+\path [name intersections={of=south2-side1-temp and north1-base}];
+\coordinate (i-9) at (intersection-1);
+%\fill[fill=green,draw=blue] (i-9) circle (0.8mm); 
+\path [name intersections={of=south2-side2-temp and north1-base}];
+\coordinate (i-10) at (intersection-1);
+%\fill[fill=green,draw=blue] (i-10) circle (0.8mm);
+
+
+%Now extend the sides thro these intersection points to a certain distance
+% These will intersect the line that carries the vertex of south 2 triangle at 2 points. 
+% Those points will form the base of this triangle
+\path[name path=north3-side1-temp] (south1-m-1) -- ($(south1-m-1)!2.5!(i-9)$);
+\path[name path=north3-side2-temp] (south1-m-1) -- ($(south1-m-1)!2.5!(i-10)$);
+
+%Find the intersection of these extended lines with the line carrying the vertex of south 2 triangle 
+\path[name path=south2-vertex-line] (i-5) -- (i-6);
+%Find the intersection points with extended north 3 sides
+\path [name intersections={of=south2-vertex-line and north3-side1-temp}];
+\coordinate (north3-base-1) at (intersection-1);
+%\fill[fill=green,draw=blue] (north3-base-1) circle (0.8mm); 
+\path [name intersections={of=south2-vertex-line and north3-side2-temp}];
+\coordinate (north3-base-2) at (intersection-1);
+%\fill[fill=green,draw=blue] (north3-base-2) circle (0.8mm);
+
+% Draw the North 3 triangle
+%%% Draw with color in the end!!!
+\path[name path global=north3] (south1-m-1) -- (north3-base-1) -- (north3-base-2) -- cycle;
+
+
+%%%%%%%%%% Now NORTH 2 TRIANGLE can be drawn
+%%%%%%%%%%%%%%%%%%%%%%%%%%5
+
+%% with a radius , draw arcs with the base vertices of north 1 triangle to cut the inscribing circle at 2 
+%points and find its center. This is the top vertex of the 2nd south facing triangle
+ \edef\percR{1.055*\r}  %%%%%%% This is the point of genius 
+\begin{scope}[shift={(north1-base-1)}]         
+	\path[name path global=north1-arc-1] (60:\percR) arc (60:90:\percR);
+\end{scope}
+\begin{scope}[shift={(north1-base-2)}] 
+	\path[name path global=north1-arc-2] (90:\percR) arc (90:120:\percR);
+\end{scope}
+
+%Find the intersection points with circleInner
+\path [name intersections={of=circleInner and north1-arc-1}];
+\coordinate (i-11) at (intersection-1);
+%\fill[fill=green,draw=blue] (i-11) circle (0.8mm); 
+\path [name intersections={of=circleInner and north1-arc-2}];
+\coordinate (i-12) at (intersection-1);
+%\fill[fill=green,draw=blue] (i-12) circle (0.8mm);
+
+
+%The mid point gives the top vertex
+\coordinate (north2-m-1) at ($(i-11)!0.5!(i-12)$);
+%\fill[fill=green,draw=blue] (north2-m-1) circle (0.8mm);
+
+%Find the intersection of south triangle 1 with the base of north triangle 1 
+\path[name path=north1-base] (north1-base-1) -- (north1-base-2);
+%Find the intersection points with south1
+\path [name intersections={of=south1 and north1-base}];
+\coordinate (i-13) at (intersection-1);
+%\fill[fill=green,draw=blue] (i-13) circle (0.8mm); 
+\coordinate (i-14) at (intersection-2);
+%\fill[fill=green,draw=blue] (i-14) circle (0.8mm);
+
+%Now extend the sides thro these intersection points to a certain distance
+% These need  to be stored... the base will be determined after the north 3 triangle is complete
+\path[name path=north2-side1-temp] (north2-m-1) -- ($(north2-m-1)!1.5!(i-13)$);
+\path[name path=north2-side2-temp] (north2-m-1) -- ($(north2-m-1)!1.5!(i-14)$);
+
+%%%%%%%%%%% finding the base line for North 2 triangle
+% Now find the base points
+%
+\coordinate (south1-m-2) at ($(south1-base-1)!0.5!(south1-base-2)$);
+%
+\path[name path=south1-side1](south1-base-2) -- (A-6);
+\path[name path=north3-side1](north3-base-1) -- (south1-m-2);
+\path [name intersections={of=south1-side1 and north3-side1}];
+\coordinate (north2-tempbase-1) at (intersection-1);
+%\fill[fill=green,draw=blue] (north2-tempbase-1) circle (0.8mm);
+%
+\path[name path=south1-side2](south1-base-1) -- (A-6);
+\path[name path=north3-side2](north3-base-2) -- (south1-m-2); 
+\path [name intersections={of=south1-side2 and north3-side2}];
+\coordinate (north2-tempbase-2) at (intersection-1);
+%\fill[fill=green,draw=blue] (north2-tempbase-2) circle (0.8mm);
+%
+\coordinate (north2-m-2) at ($(north2-tempbase-1)!0.5!(north2-tempbase-2)$);
+%\fill[fill=green,draw=blue] (north2-m-2) circle (0.8mm);
+\path[name path=north2-tempbaseline] ($(north2-m-2)!2!(north2-tempbase-1)$) -- ($(north2-m-2)!2!(north2-tempbase-2)$);
+
+%%%%%%%%%%%%%%%%%%%%%%%
+% Now find the base points for north 2
+\path [name intersections={of=north2-tempbaseline and north2-side2-temp}];
+\coordinate (north2-base-1) at (intersection-1);
+%\fill[fill=green,draw=blue] (north2-base-1) circle (0.8mm); 
+\path [name intersections={of=north2-tempbaseline and north2-side1-temp}];
+\coordinate (north2-base-2) at (intersection-1);
+%\fill[fill=green,draw=blue] (north2-base-2) circle (0.8mm);
+
+% Draw the North 2 triangle
+%%% Draw with color in the end!!!
+\path[name path global=north2] (north2-m-1) -- (north2-base-1) -- (north2-base-2) -- cycle;
+
+
+%%%%%%%%%%%% Back to completing the SOUTH 2 Triangle
+%%%%% Now find the points of intersection between the sides of North 2 triangle with 
+%%%%% the base of South 1 triangle. 
+
+%Find the intersection of north triangle 2 with the base of south triangle 1 
+\path [name intersections={of=north2 and south1-base}];
+\coordinate (i-15) at (intersection-1);
+%\fill[fill=green,draw=blue] (i-15) circle (0.8mm); 
+\coordinate (i-16) at (intersection-2);
+%\fill[fill=green,draw=blue] (i-16) circle (0.8mm);
+
+% Now draw diagonals between these points and the points where  North 2 triangle intersects with 
+%%%% the base of North 1 triangle. 
+\path[name path=north2-base-south1-base-D1](i-13) -- (i-15);
+\path[name path=north2-base-south1-base-D2](i-14) -- (i-16);
+
+%%%% These diagonals intersect the south 2 triangle at two points.
+%%% Find and mark them
+\path [name intersections={of=north2-base-south1-base-D1 and south2-side2-temp}];
+\coordinate (north4-base-1) at (intersection-1);
+%\fill[fill=green,draw=blue] (north4-base-1) circle (0.8mm); 
+\path [name intersections={of=north2-base-south1-base-D2 and south2-side1-temp}];
+\coordinate (north4-base-2) at (intersection-1);
+%\fill[fill=green,draw=blue] (north4-base-2) circle (0.8mm);
+
+%%%  ONLY after South 3 triangle is finished we can move forward
+%The mid point gives the top vertex for SOUTH 3 triange
+\coordinate (south3-m-1) at ($(north4-base-1)!0.5!(north4-base-2)$);
+%\fill[fill=green,draw=blue] (south3-m-1) circle (0.8mm);
+
+%Now extend the sides thro these intersection points of North 2  triangle with South 1 base
+% These will intersect the line that carries the vertex of north 2 triangle at 2 points. 
+% Those points will form the base of this triangle
+\path[name path=south3-side1-temp] (south3-m-1) -- ($(south3-m-1)!2.5!(i-15)$);
+\path[name path=south3-side2-temp] (south3-m-1) -- ($(south3-m-1)!2.5!(i-16)$);
+
+%Find the intersection of these extended lines with the line carrying the vertex of north 2 triangle 
+\path[name path=north2-vertex-line] (i-11) -- (i-12);
+%Find the intersection points with extended south 3 sides
+\path [name intersections={of=north2-vertex-line and south3-side1-temp}];
+\coordinate (south3-base-1) at (intersection-1);
+%\fill[fill=green,draw=blue] (south3-base-1) circle (0.8mm); 
+\path [name intersections={of=north2-vertex-line and south3-side2-temp}];
+\coordinate (south3-base-2) at (intersection-1);
+%\fill[fill=green,draw=blue] (south3-base-2) circle (0.8mm);
+
+% Draw the South 3 triangle
+%%% Draw with color in the end!!!
+\path[name path global=south3] (south3-m-1) -- (south3-base-1) -- (south3-base-2) -- cycle;
+
+
+%%%%%%%%%%% Back to finding the base line for South 2 triangle
+% Now find the base points
+\path[name path=north1-side1](north1-base-1) -- (A-3);
+\path[name path=south3-side1](south3-base-1) -- (south3-m-1);
+\path [name intersections={of=north1-side1 and south3-side1-temp}];
+\coordinate (south2-tempbase-1) at (intersection-1);
+%\fill[fill=green,draw=blue] (south2-tempbase-1) circle (0.8mm);
+%
+\path[name path=north1-side2](north1-base-2) -- (A-3);
+\path[name path=south3-side2](south3-base-2) -- (south3-m-1); 
+\path [name intersections={of=north1-side2 and south3-side2-temp}];
+\coordinate (south2-tempbase-2) at (intersection-1);
+%\fill[fill=green,draw=blue] (south2-tempbase-2) circle (0.8mm);
+%
+\coordinate (south2-m-2) at ($(south2-tempbase-1)!0.5!(south2-tempbase-2)$);
+%\fill[fill=green,draw=blue] (south2-m-2) circle (0.8mm);
+\path[name path=south2-tempbaseline] ($(south2-m-2)!2!(south2-tempbase-1)$) -- ($(south2-m-2)!2!(south2-tempbase-2)$);
+
+
+%% now find the itersection of this line with the temporary sides of south 2 triangle and figure out the base vertices
+% Now find the base points for south 2
+\path [name intersections={of=south2-tempbaseline and south2-side2-temp}];
+\coordinate (south2-base-1) at (intersection-1);
+%\fill[fill=green,draw=blue] (south2-base-1) circle (0.8mm); 
+\path [name intersections={of=south2-tempbaseline and south2-side1-temp}];
+\coordinate (south2-base-2) at (intersection-1);
+%\fill[fill=green,draw=blue] (south2-base-2) circle (0.8mm);
+
+% Draw the South 2 triangle
+%%% Draw with color in the end!!!
+\path[name path global=south2] (south2-m-1) -- (south2-base-1) -- (south2-base-2) -- cycle;
+
+
+%%%%%%%%%% North 4 triangle 
+%% Now North 4 triangle's vertex is the mid point of the base for south 2 triangle
+%The mid point gives the top vertex
+\coordinate (north4-m-1) at ($(south2-base-1)!0.5!(south2-base-2)$);
+%\fill[fill=green,draw=blue] (north4-m-1) circle (0.8mm);
+
+% Draw the North 4 triangle
+%%% Draw with color in the end!!!
+\path[name path global=north4] (south2-m-2) -- (north4-base-1) -- (north4-base-2) -- cycle;
+
+%%%%%%%%5 For the south 4 triangle
+%%%%%% Find the intersections of the sides of North 4 and South 3 triangles
+%%%55 Join them and extend them to meet the sides of North 2 triangle
+
+\path [name intersections={of=north4 and south3}];
+\coordinate (south4-tempbase-1) at (intersection-1);
+%\fill[fill=green,draw=blue] (south4-tempbase-1) circle (0.8mm); 
+\coordinate (south4-tempbase-2) at (intersection-3);
+%\fill[fill=green,draw=blue] (south4-tempbase-2) circle (0.8mm);
+
+%The mid point on the base
+\coordinate (south4-m-2) at ($(south4-tempbase-1)!0.5!(south4-tempbase-2)$);
+%\fill[fill=green,draw=blue] (south4-m-2) circle (0.8mm);
+
+%Now extend the sides thro these intersection points of North 2  triangle with South 1 base
+% These will intersect the line that carries the vertex of north 2 triangle at 2 points. 
+% Those points will form the base of this triangle
+\path[name path=south4-tempbaseline] ($(south4-m-2)!2.5!(south4-tempbase-1)$) -- ($(south4-m-2)!2.5!(south4-tempbase-2)$);
+
+%%% Find the intersection points with North 2 triangle
+\path [name intersections={of=north2 and south4-tempbaseline}];
+\coordinate (south4-base-1) at (intersection-1);
+%\fill[fill=green,draw=blue] (south4-base-1) circle (0.8mm); 
+\coordinate (south4-base-2) at (intersection-2);
+%\fill[fill=green,draw=blue] (south4-base-2) circle (0.8mm);
+
+%% The mid point of the North triangle 2's base points is the vertex
+\coordinate (north2-m-2) at ($(north2-base-1)!0.5!(north2-base-2)$);
+%\fill[fill=green,draw=blue] (north2-m-2) circle (0.8mm);
+
+
+%%%Draw the South 4 triangle
+%%% Draw with color in the end!!!
+\path[name path global=south4] (north2-m-2) -- (south4-base-1) -- (south4-base-2) -- cycle;
+
+
+
+
+%%%%%%%%5 For the south 5 triangle
+%%%%%% Find the intersections of the sides of North 3 and South 3 triangles
+%%%55 Join them and extend them to meet the sides of North 4 triangle
+
+\path [name intersections={of=north3 and south3}];
+\coordinate (south5-tempbase-1) at (intersection-1);
+%\fill[fill=green,draw=blue] (south5-tempbase-1) circle (0.8mm); 
+\coordinate (south5-tempbase-2) at (intersection-2);
+%\fill[fill=green,draw=blue] (south5-tempbase-2) circle (0.8mm);
+
+%The mid point on the base
+\coordinate (south5-m-2) at ($(south5-tempbase-1)!0.5!(south5-tempbase-2)$);
+%\fill[fill=green,draw=blue] (south5-m-2) circle (0.8mm);
+
+%Now extend the sides thro these intersection points of North 4  triangle 
+% Those points will form the base of this triangle
+\path[name path=south5-tempbaseline] ($(south5-m-2)!2.5!(south5-tempbase-1)$) -- ($(south5-m-2)!2.5!(south5-tempbase-2)$);
+
+%%% Find the intersection points with North 4 triangle
+\path [name intersections={of=north4 and south5-tempbaseline}];
+\coordinate (south5-base-1) at (intersection-1);
+%\fill[fill=green,draw=blue] (south5-base-1) circle (0.8mm); 
+\coordinate (south5-base-2) at (intersection-2);
+%\fill[fill=green,draw=blue] (south5-base-2) circle (0.8mm);
+
+%% The mid point of the North triangle 1's base points is the vertex
+\coordinate (north1-m-2) at ($(north1-base-1)!0.5!(north1-base-2)$);
+%\fill[fill=green,draw=blue] (north1-m-2) circle (0.8mm);
+
+
+%%%Draw the South 5 triangle
+%%% Draw with color in the end!!!
+\path[name path global=south5] (north1-m-2) -- (south5-base-1) -- (south5-base-2) -- cycle;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%% END OF CALCULATIONS %%%%%%%%%%%%%%%
+
+%color the intersection of both the triangles to be white
+\begin{scope}
+	\draw[filled, even odd rule]
+%	\shadedraw[shading=radial,outer color=ForestGreen,middle color=ForestGreen,
+%        inner color=Cyan,draw=black,name path=chakram, even odd rule]%
+	%south1
+	(A-6) -- (south1-base-1) -- (south1-base-2) -- cycle
+	%north1
+	(A-3) -- (north1-base-1) -- (north1-base-2) -- cycle
+	%north3
+	 (south1-m-1) -- (north3-base-1) -- (north3-base-2) -- cycle
+	%north2
+	(north2-m-1) -- (north2-base-1) -- (north2-base-2) -- cycle
+	%south3
+	 (south3-m-1) -- (south3-base-1) -- (south3-base-2) -- cycle
+	%south2
+	 (south2-m-1) -- (south2-base-1) -- (south2-base-2) -- cycle
+	%north4
+	(south2-m-2) -- (north4-base-1) -- (north4-base-2) -- cycle
+	%south4
+	(north2-m-2) -- (south4-base-1) -- (south4-base-2) -- cycle
+	%south5
+	(north1-m-2) -- (south5-base-1) -- (south5-base-2) -- cycle; 
+	\node[anchor=south] at (current bounding box.north) {};
+\end{scope}
+
+%\draw[fill=white] (A-6) -- (south1-base-1) -- (south1-base-2) -- cycle;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%% Finally draw the bindu
+\draw[\binduLineColor,fill=\binduAreaColor,thick,name path=circleBindu] circle (\r/20);
+%mark the center
+\fill[fill=red] (0,0) circle (\r/100);
+
+
+%%%%%%%%%%%%% Now 
+%\pgfgetangleofAOB{\firstangle}{south3-base-1}{south3-m-1}{south3-base-2}%  
+%\draw[mark angle,/pgf/decoration/mark angle node     text={$\firstangle$},black] (south3-base-1) -- (south3-m-1) -- (south3-base-2);  
+%
+%\pgfgetangleofAOB{\secondangle}{south3-m-1}{south3-base-2}{south3-base-1}%  
+%\draw[mark angle,/pgf/decoration/mark angle node     text={$\secondangle$},black] (south3-m-1) -- (south3-base-2) --  (south3-base-1);  
+%
+%\pgfgetangleofAOB{\thirdangle}{south3-m-1}{south3-base-1}{south3-base-2}%  
+%\draw[mark angle,/pgf/decoration/mark angle node     text={$\thirdangle$},black] (south3-m-1) --  (south3-base-1) -- (south3-base-2) ;  
+
+%\pgfgetangleofAOB{\thirdangle}{south5-base-1}{north1-m-2}{south5-base-2}%  
+%\draw[mark angle,/pgf/decoration/mark angle node     text={$\thirdangle$},black]  (south5-base-1) -- (north1-m-2) -- (south5-base-2) ;  
+
+%\pgfgetangleofAOB{\thirdangle}{north1-m-2}{south5-base-1}{south5-base-2}%  
+%\draw[mark angle,/pgf/decoration/mark angle node     text={$\thirdangle$},black]   (north1-m-2) -- (south5-base-1) -- (south5-base-2) ;  
+
+\end{tikzpicture}
+
+
+%\end{center}
+
+\eng{
+
+% now find the angle of the inner most triangle i.e. angle 
+
+}
+
+\end{document}
